@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 public class MyCalculate {
@@ -7,24 +9,26 @@ public class MyCalculate {
         calculate = num;
     }
 
-    Stack<Integer> nStack = new Stack<Integer>();
-    Stack<Character> sStack = new Stack<Character>();
+    Stack<Integer> nStack = new Stack<>();
+    Stack<Character> sStack = new Stack<>();
+    Stack<Integer> number = new Stack<>();
+    List<String> cNum = new ArrayList<>();
 
     public void calculate() {
-        for (int i = 0; i < calculate.length(); i++) {
-            char c = calculate.charAt(i);
-            //System.out.println(c);
+        turns();
+        for (int i = 0; i < cNum.size(); i++) {
+            String c = cNum.get(i);
 
             //运算符
-            if (isNumber(c)) {
-                int num = c - '0';
+            if (!isOperator(c.charAt(0))) {
+                int num = Integer.parseInt(c);
                 nStack.push(num);
                 continue;
             }
 
             //操作符
-            if (isOperator(c)) {
-                if (c == ')') {
+            else if (isOperator(c.charAt(0))) {
+                if (c.charAt(0) == ')') {
                     while (sStack.peek() != '(') {
                         setCalculate();
                     }
@@ -32,14 +36,14 @@ public class MyCalculate {
                         sStack.pop();
                         continue;
                     }
-                } else if (sStack.empty() || c == '(' || priority(c) > priority(sStack.peek())) {
-                    sStack.push(c);
+                } else if (sStack.empty() || c.charAt(0) == '(' || priority(c.charAt(0)) > priority(sStack.peek())) {
+                    sStack.push(c.charAt(0));
                     continue;
-                } else if (priority(c) <= priority(sStack.peek())) {
+                } else if (priority(c.charAt(0)) <= priority(sStack.peek())) {
                     while (true) {
                         setCalculate();
-                        if (sStack.empty()) {
-                            sStack.push(c);
+                        if (sStack.empty()||priority(c.charAt(0))>priority(sStack.peek())) {
+                            sStack.push(c.charAt(0));
                             break;
                         }
                     }
@@ -66,7 +70,11 @@ public class MyCalculate {
                 nStack.push(b * a);
                 break;
             case '/':
+                try {
                 nStack.push(b / a);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 break;
             default:
                 break;
@@ -88,20 +96,51 @@ public class MyCalculate {
         return -1;
     }
 
-    public Boolean isNumber(char c) {
+    public Boolean isNumber(Character c) {
         if (c >= '0' && c <= '9')
             return true;
         else
             return false;
     }
 
-    public Boolean isOperator(char c) {
+    public Boolean isOperator(Character c) {
         if (c == '+' || c == '-' || c == '*' || c == '/' || c == ')' || c == '(' || c == '=')
             return true;
         else
             return false;
     }
 
+
+    public void turns(){
+        for (int i = 0; i <calculate.length() ; i++) {
+            char c = calculate.charAt(i);
+            if(isNumber(c)) {
+                number.push(c-'0');
+            }
+            else if (isOperator(c)){
+                String ch=toChar();
+                if (!ch.equals("0")) {
+                    cNum.add(ch);
+                    cNum.add(String.valueOf(c));
+                }
+                else
+                    cNum.add(String.valueOf(c));
+            }
+        }
+    }
+
+
+    public String toChar(){
+        int i=0;
+        int num=0;
+        while (!number.empty()){
+            num = num+(number.pop()*(int)Math.pow(10,i));
+            i++;
+        }
+        return String.valueOf(num);
+    }
+
 }
 
 //      3+9/(1+2)-1=
+//      16+4/(1+1)*4-12=
